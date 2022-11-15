@@ -1,0 +1,13 @@
+id,fname,lname,email,country,subscription,categories
+0,John,Smith,John.Smith@jmamil.com,US,1,animals;duck;cute;travel
+1,Bob,Johnson,Bob.Johnson@jmamil.com,CA,0,animals;duck;bicycle
+2,Alan,Miller,Alan.Miller@jmamil.com,US,1,duck;cute;bicycle
+3,Mary,Jones,Mary.Jones@jmamil.com,CA,0,animals;cute;travel;bicycle;mountains
+4,Emily,Williams,Emily.Williams@jmamil.com,UK,0,animals;duck
+5,Laura,Anderson,Laura.Anderson@jmamil.com,US,1,food;cute
+6,Mary,Smith,Mary.Smith@jmamil.com,CA,0,animals;food;travel;mountains
+7,Bob,Miller,Bob.Miller@jmamil.com,US,1,animals;food;travel;bicycle
+8,Mary,Anderson,Mary.Anderson@jmamil.com,UK,0,animals;food;travel;bicycle
+9,Bob,Anderson,xxx,xxx,xx,
+10,Alan,Jones,Alan.Jones@jmamil.com,UK,0,
+11,,,,,,
