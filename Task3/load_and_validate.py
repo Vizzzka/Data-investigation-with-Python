@@ -19,7 +19,7 @@ args = {
     'schedule_interval': "0 */3 * * *"
 }
 
-dag = models.DAG(dag_id='load_raw_data', default_args=args)
+dag = models.DAG(dag_id='load_and_validate_data', default_args=args)
 
 
 start_pipeline = DummyOperator(
