@@ -1,6 +1,4 @@
-CREATE OR REPLACE TABLE DWH.D_Videos
-PARTITION BY RANGE_BUCKET ( id, GENERATE_ARRAY(1, 5000, 100)) AS (
-
+INSERT INTO DWH.D_Videos
 SELECT DISTINCT
   videos.id,
   name,
@@ -22,4 +20,3 @@ WHERE id IS NOT NULL
   LEFT JOIN DWH.D_Users
 ON D_Users.id = SAFE_CAST(videos.creator_id AS INTEGER)
 
-)

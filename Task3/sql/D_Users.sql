@@ -1,6 +1,5 @@
 
-CREATE OR REPLACE TABLE DWH.D_Users
-PARTITION BY RANGE_BUCKET ( id, GENERATE_ARRAY(1, 5000, 100)) AS (
+INSERT INTO DWH.D_Users
 
 SELECT DISTINCT
   ROW_NUMBER() OVER(PARTITION BY id) as key,
@@ -21,4 +20,3 @@ WHERE id IS NOT NULL
   AND REGEXP_CONTAINS(email, "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+.[A-Za-z]{2,6}")
   AND country is not NULL
   AND (subscription = "1" OR subscription = "0")
-)
