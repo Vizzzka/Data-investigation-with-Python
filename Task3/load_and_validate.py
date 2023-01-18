@@ -1,6 +1,7 @@
 import airflow
 from airflow import models
 from airflow.operators.dummy_operator import DummyOperator
+from airflow.providers.google.cloud.transfers.gcs_to_gcs import GCSToGCSOperator
 from airflow.contrib.operators.bigquery_check_operator import BigQueryCheckOperator
 from airflow.contrib.operators.bigquery_operator import BigQueryOperator
 from airflow.contrib.operators import gcs_to_bq
@@ -88,33 +89,90 @@ check_videos = BigQueryCheckOperator(
     dag=dag
 )
 
-create_d_users = BigQueryOperator(
-    task_id='create_d_users',
+validate_users = BigQueryOperator(
+    task_id='validate_users',
     use_legacy_sql=False,
     params={
         'project_id': project_id,
         'staging_dataset': staging_dataset,
         'dwh_dataset': dwh_dataset
     },
-    sql='./data/D_Users.sql'
+    sql='./data/D_Users_Validate.sql',
+    dag=dag
 )
 
-create_d_videos = BigQueryOperator(
-    task_id='create_d_videos',
+merge_users = BigQueryOperator(
+    task_id='merge_users',
     use_legacy_sql=False,
     params={
         'project_id': project_id,
         'staging_dataset': staging_dataset,
         'dwh_dataset': dwh_dataset
     },
-    sql='./data/Videos.sql'
+    sql='../data/D_Users_Merge.sql',
+    dag=dag
 )
+
+insert_d_videos = BigQueryOperator(
+    task_id='insert_d_videos',
+    use_legacy_sql=False,
+    params={
+        'project_id': project_id,
+        'staging_dataset': staging_dataset,
+        'dwh_dataset': dwh_dataset
+    },
+    sql='../data/D_Videos_Insert.sql',
+    dag=dag
+)
+
+loaded_data_to_core = DummyOperator(
+    task_id='loaded_data_to_core',
+    dag=dag
+)
+
+
+move_users_to_archive = GCSToGCSOperator(
+    task_id="move_users_file",
+    source_bucket=f'{gs_bucket}',
+    source_object="raw_data/users.csv",
+    destination_bucket=f'{gs_bucket}',
+    destination_object="archive/users/users.csv",
+    move_object=True,
+    dag=dag
+)
+
+move_videos_to_archive = GCSToGCSOperator(
+    task_id="move_videos_file",
+    source_bucket=f'{gs_bucket}',
+    source_object="raw_data/videos.csv",
+    destination_bucket=f'{gs_bucket}',
+    destination_object="archive/videos/videos.csv",
+    move_object=True,
+    dag=dag
+)
+
+move_events_to_archive = GCSToGCSOperator(
+    task_id="move_events_file",
+    source_bucket=f'{gs_bucket}',
+    source_object="raw_data/events.jsonl",
+    destination_bucket=f'{gs_bucket}',
+    destination_object="archive/events/events.jsonl",
+    move_object=True,
+    dag=dag
+)
+
 
 start_pipeline >> [load_users, load_videos, load_events]
 
-load_users >> check_users
-load_videos >> check_videos
+load_users >> check_users >> move_users_to_archive
+load_videos >> check_videos >> move_videos_to_archive
+load_events >> move_events_to_archive
 
-[check_users, check_videos] >> loaded_data_to_staging
+[move_users_to_archive, move_videos_to_archive, move_events_to_archive] >> loaded_data_to_staging
 
-loaded_data_to_staging >> [create_d_users, create_d_videos]
+loaded_data_to_staging >> [insert_d_videos, validate_users]
+
+insert_d_videos
+validate_users >> merge_users
+
+[insert_d_videos, merge_users] >> loaded_data_to_core

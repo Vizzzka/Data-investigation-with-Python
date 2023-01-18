@@ -26,27 +26,50 @@ start_pipeline = DummyOperator(
     dag=dag
 )
 
-
-create_d_users = BigQueryOperator(
-    task_id='create_d_users',
+validate_users = BigQueryOperator(
+    task_id='validate_users',
     use_legacy_sql=False,
     params={
         'project_id': project_id,
         'staging_dataset': staging_dataset,
         'dwh_dataset': dwh_dataset
     },
-    sql='./data/D_Users.sql'
+    sql='../data/D_Users_Validate.sql',
+    dag=dag
 )
 
-create_d_videos = BigQueryOperator(
-    task_id='create_d_videos',
+merge_users = BigQueryOperator(
+    task_id='merge_users',
     use_legacy_sql=False,
     params={
         'project_id': project_id,
         'staging_dataset': staging_dataset,
         'dwh_dataset': dwh_dataset
     },
-    sql='./data/Videos.sql'
+    sql='../data/D_Users_Merge.sql',
+    dag=dag
 )
 
-start_pipeline >> [create_d_users, create_d_videos]
+insert_d_videos = BigQueryOperator(
+    task_id='insert_d_videos',
+    use_legacy_sql=False,
+    params={
+        'project_id': project_id,
+        'staging_dataset': staging_dataset,
+        'dwh_dataset': dwh_dataset
+    },
+    sql='./data/D_Videos_Insert.sql',
+    dag=dag
+)
+
+loaded_data_to_core = DummyOperator(
+    task_id='loaded_data_to_staging',
+    dag=dag
+)
+
+start_pipeline >> [insert_d_videos, validate_users]
+
+insert_d_videos
+validate_users >> merge_users
+
+[insert_d_videos, merge_users] >> loaded_data_to_core
