@@ -1,0 +1,9 @@
+[
+        {"name": "id", "type": "INTEGER", "mode": "NULLABLE"},
+        {"name": "fname", "type": "STRING", "mode": "NULLABLE"},
+        {"name": "lname", "type": "STRING", "mode": "NULLABLE"},
+        {"name": "email", "type": "STRING", "mode": "NULLABLE"},
+        {"name": "country", "type": "STRING", "mode": "REPEATED"},
+        {"name": "subscription", "type": "STRING", "mode": "NULLABLE"},
+        {"name": "categories", "type": "STRING", "mode": "NULLABLE"}
+]

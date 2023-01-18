@@ -1,0 +1,9 @@
+[
+        {"name": "user_id", "type": "INTEGER", "mode": "NULLABLE"},
+        {"name": "video_id", "type": "INTEGER", "mode": "NULLABLE"},
+        {"name": "event", "type": "STRING", "mode": "NULLABLE"},
+        {"name": "timestamp", "type": "INTEGER", "mode": "NULLABLE"},
+        {"name": "tags", "type": "STRING", "mode": "REPEATED"},
+        {"name": "comment", "type": "STRING", "mode": "NULLABLE"},
+        {"name": "events", "type": "JSON", "mode": "NULLABLE"}
+]
