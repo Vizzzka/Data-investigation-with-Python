@@ -32,12 +32,11 @@ load_users = gcs_to_bq.GoogleCloudStorageToBigQueryOperator(
     bucket=f'{gs_bucket}',
     source_objects=['raw_data/users.csv'],
     source_format='CSV',
-    schema_object='../schemas/users_schema.json',
+    schema_object='schemas/users_schema.json',
     skip_leading_rows=1,
     destination_project_dataset_table=f'{staging_dataset}.Users',
     write_disposition='WRITE_TRUNCATE',
     dag=dag)
-
 
 load_videos = gcs_to_bq.GoogleCloudStorageToBigQueryOperator(
     task_id='load_videos',
@@ -97,7 +96,7 @@ validate_users = BigQueryOperator(
         'staging_dataset': staging_dataset,
         'dwh_dataset': dwh_dataset
     },
-    sql='./data/D_Users_Validate.sql',
+    sql='sql/D_Users_Validate.sql',
     dag=dag
 )
 
@@ -109,7 +108,7 @@ merge_users = BigQueryOperator(
         'staging_dataset': staging_dataset,
         'dwh_dataset': dwh_dataset
     },
-    sql='../data/D_Users_Merge.sql',
+    sql='sql/D_Users_Merge.sql',
     dag=dag
 )
 
@@ -121,7 +120,7 @@ insert_d_videos = BigQueryOperator(
         'staging_dataset': staging_dataset,
         'dwh_dataset': dwh_dataset
     },
-    sql='../data/D_Videos_Insert.sql',
+    sql='sql/D_Videos_Insert.sql',
     dag=dag
 )
 
