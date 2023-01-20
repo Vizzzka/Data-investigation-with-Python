@@ -1,8 +1,8 @@
-MERGE `DWH.D_Users` D_U
-USING `DWH_STAGING.Users` U
-ON U.id = D_U.id
-WHEN MATCHED  AND effective_end = DATETIME(2100, 12, 25, 05, 30, 00) THEN
-  UPDATE SET effective_end = current_datetime()
+MERGE DWH.D_Users D_U
+USING DWH_STAGING.Users U
+ON D_U.id = U.id AND D_U.key = U.key
+WHEN MATCHED THEN
+  UPDATE SET D_U.effective_end = U.effective_end
 WHEN NOT MATCHED THEN
-  INSERT (key, id, fname, lname, email, country, is_active, effective_start, effective_end)
-  VALUES(1, id, fname, lname, email, country,TRUE, current_datetime(), DATETIME(2100, 12, 25, 05, 30, 00))
+  INSERT(id, fname, lname, email, country, is_active, effective_start, effective_end)
+  VALUES(U.id, U.fname, U.lname, U.email, U.country, True, DATETIME(TIMESTAMP_SECONDS(U.timestamp)), U.effective_end)
