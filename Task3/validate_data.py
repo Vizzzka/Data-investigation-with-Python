@@ -38,6 +38,42 @@ validate_users = BigQueryOperator(
     dag=dag
 )
 
+core_to_raw_insert_users = BigQueryOperator(
+    task_id='core_to_raw_insert_users',
+    use_legacy_sql=False,
+    params={
+        'project_id': project_id,
+        'staging_dataset': staging_dataset,
+        'dwh_dataset': dwh_dataset
+    },
+    sql='sql/D_Users_Insert_Core_To_Raw.sql',
+    dag=dag
+)
+
+lead_end_date_users = BigQueryOperator(
+    task_id='lead_end_date_users',
+    use_legacy_sql=False,
+    params={
+        'project_id': project_id,
+        'staging_dataset': staging_dataset,
+        'dwh_dataset': dwh_dataset
+    },
+    sql='sql/D_Users_Lead_End_Date.sql',
+    dag=dag
+)
+
+update_end_date_users = BigQueryOperator(
+    task_id='update_end_date_users',
+    use_legacy_sql=False,
+    params={
+        'project_id': project_id,
+        'staging_dataset': staging_dataset,
+        'dwh_dataset': dwh_dataset
+    },
+    sql='sql/D_Users_Update_End_Date.sql',
+    dag=dag
+)
+
 merge_users = BigQueryOperator(
     task_id='merge_users',
     use_legacy_sql=False,
@@ -70,6 +106,6 @@ loaded_data_to_core = DummyOperator(
 start_pipeline >> [insert_d_videos, validate_users]
 
 insert_d_videos
-validate_users >> merge_users
+validate_users >> core_to_raw_insert_users >> lead_end_date_users >> update_end_date_users >> merge_users
 
 [insert_d_videos, merge_users] >> loaded_data_to_core
